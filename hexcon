@@ -1,0 +1,130 @@
+#!/bin/bash
+################################################################################
+# Name:        hexcon
+# Date:        2024-05-28
+# Author:      Amosnimos
+# Description: Generate themes from hex files for kitty.conf
+################################################################################
+
+# ▌ ▌▛▀▘▌ ▌▞▀▖▞▀▖▙ ▌
+# ▙▄▌▙▄ ▝▞ ▌  ▌ ▌▌▌▌
+# ▌ ▌▌  ▞▝▖▌ ▖▌ ▌▌▝▌
+# ▘ ▘▀▀▘▘ ▘▝▀ ▝▀ ▘ ▘
+
+print_help(){
+    echo "Usage: $0 [options]"
+    echo 
+    echo "Options:"
+    echo "  -h, --help     Display this help message"
+    echo "  -o, --output   Output to kitty theme.conf file"
+    echo "  -r, --reverse  Sort colors from light to dark"
+    echo "  -s, --sort     Sort colors from dark to light"
+    echo "  -d, --default  default basecolors (cursor, foreground, background)"
+    # The default base colors must be set in the 
+    echo "  -f, --file     Specify the file containing hexadecimal colors"
+    echo 
+    echo "You can get cool palettes at: https://lospec.com/palette-list"
+    echo "The theme can then be included in the kitty.conf using 'include theme.conf'"
+    exit 0
+}
+
+# Function to sort colors from dark to light or reverse
+sort_colors(){
+    if [ "$1" = true ]; then
+        sort -n
+    else
+        sort -nr
+    fi
+}
+
+output="false"
+
+# Parse command line options
+while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
+    case $1 in
+        -h | --help )
+            print_help
+            ;;
+        -o | --output )
+            output="true"
+            ;;
+        -d | --default )
+            default="true"
+            ;;
+        -r | --reverse )
+            reverse="true"
+            ;;
+        -s | --sorted )
+            reverse="false"
+            ;;
+        -f | --file )
+            shift
+            colors_file="$1"
+            ;;
+    esac
+    shift
+done
+
+# case for long flags
+#if [[ "$1" == "--" ]]; then shift; fi
+
+# Check if the file argument is provided
+#if [ -z "$1" ]; then
+#    print_help
+#    exit 1
+#fi
+
+# Read the colors from the file specified as argument
+colors_name=("Black" "Red" "Green" "Yellow" "Blue" "Pink" "Cyan" "White")
+colors=($(<"$colors_file"))
+
+# Sort the hexadecimal colors\
+if [[ -n $reverse ]]; then
+    sorted_colors=( $(
+        for color in "${colors[@]}"; do
+            echo "$color"
+        done | sort_colors "$reverse"
+    ) )
+else
+    # Make sorted_colors array equal to colors array
+    sorted_colors=("${colors[@]}")
+fi
+
+# ! The part that create the palet
+
+# Check if the number of colors is valid
+if [ ${#colors[@]} -ne 8 ]; then
+    echo "Error: The file must contain exactly 8 hexadecimal color codes."
+    exit 1
+fi
+
+# Theme name
+echo "# $(basename ${colors_file%.*})" > theme.tmp
+echo >> theme.tmp
+
+if [[ -z $default ]];then
+    echo "cursor #${sorted_colors[7]}" >> theme.tmp
+    echo "foreground #${sorted_colors[7]}" >> theme.tmp
+    echo "background #${sorted_colors[0]}" >> theme.tmp
+    echo >> theme.tmp
+fi
+
+for i in {0..7}; do
+    regular_color="${sorted_colors[$index]}"
+    bright_color="${sorted_colors[$((index))]}"
+    
+    echo "# Color ${colors_name[$index]}" >> theme.tmp
+    echo "color$i #$regular_color" >> theme.tmp
+    echo "color$((i+8)) #$bright_color" >> theme.tmp
+    index=$((i++))
+done
+
+echo "color1 #${sorted_colors[-1]}" >> theme.tmp
+echo "color9 #${sorted_colors[-1]}" >> theme.tmp
+
+
+if [[ "$output" == "true" ]]; then
+    cat theme.tmp > $HOME/.config/kitty/theme.conf
+elif [[ "$output" == "false" ]]; then
+    cat theme.tmp
+fi
