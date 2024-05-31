@@ -1,0 +1,38 @@
+################################################################################
+# Name:        template.hex
+# Date:        2024-05-31
+# Author:      Amosnimos
+# Description: Template of hex file for hexcon
+################################################################################
+
+# ▀▛▘▛▀▘▙▗▌▛▀▖▌  ▞▀▖▀▛▘▛▀▘
+#  ▌ ▙▄ ▌▘▌▙▄▘▌  ▙▄▌ ▌ ▙▄ 
+#  ▌ ▌  ▌ ▌▌  ▌  ▌ ▌ ▌ ▌  
+#  ▘ ▀▀▘▘ ▘▘  ▀▀▘▘ ▘ ▘ ▀▀▘
+# By AMOSNIMOS
+
+# Black  (000000)
+000000
+
+# Green  (00FF00)
+8ebe69
+
+# Yellow (FFFF00)
+e66633
+
+# Blue   (0000FF)
+FFAA00
+
+# Pink   (FF00FF)
+b06ee5
+
+# CYAN   (00FFFF)
+50EBDB
+
+# White  (FFFFFF)
+DBD7CB
+
+# RED    (FF0000)
+FF0000
+
+

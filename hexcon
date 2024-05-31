@@ -11,6 +11,10 @@
 # ▌ ▌▌  ▞▝▖▌ ▖▌ ▌▌▝▌
 # ▘ ▘▀▀▘▘ ▘▝▀ ▝▀ ▘ ▘
 
+# TODO:
+# Improve by using flag script
+# Make sure the color sorting is based on the color brightess and saturation
+
 print_help(){
     echo "Usage: $0 [options]"
     echo 
@@ -19,7 +23,8 @@ print_help(){
     echo "  -o, --output   Output to kitty theme.conf file"
     echo "  -r, --reverse  Sort colors from light to dark"
     echo "  -s, --sort     Sort colors from dark to light"
-    echo "  -d, --default  default basecolors (cursor, foreground, background)"
+    echo "  -d, --default  Default basecolors (cursor, foreground, background)"
+    echo "  -l, --list     List default color order."
     # The default base colors must be set in the 
     echo "  -f, --file     Specify the file containing hexadecimal colors"
     echo 
@@ -38,6 +43,9 @@ sort_colors(){
 }
 
 output="false"
+
+# Read the colors from the file specified as argument
+colors_name=("Black" "Red" "Green" "Yellow" "Blue" "Pink" "Cyan" "White")
 
 # Parse command line options
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
@@ -61,9 +69,18 @@ while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do
             shift
             colors_file="$1"
             ;;
+        -l | --list )
+            # Join array elements with a newline character
+            printf '%s\n' "${colors_name[@]}"
+            exit 0
+            ;;
     esac
     shift
 done
+
+if [[ -z $colors_file ]]; then
+    print_help
+fi
 
 # case for long flags
 #if [[ "$1" == "--" ]]; then shift; fi
@@ -74,9 +91,17 @@ done
 #    exit 1
 #fi
 
-# Read the colors from the file specified as argument
-colors_name=("Black" "Red" "Green" "Yellow" "Blue" "Pink" "Cyan" "White")
-colors=($(<"$colors_file"))
+# Join array elements with a newline character
+# Check if the file exists
+if [ -f "$colors_file" ]; then
+    # Read the file into an array and remove lines starting with #
+    colors=($(sed '/^#/d' "$colors_file"))
+    #colors=($(<"$colors_file"))
+elif [ ! -f "$colors_file" ]; then   # Check if the file exists
+    echo "Error: File $colors_file does not exist."
+    exit 1
+fi
+
 
 # Sort the hexadecimal colors\
 if [[ -n $reverse ]]; then
